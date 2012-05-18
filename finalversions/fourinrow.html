@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Four in a Row</title>
+<script type="text/javascript"
+  src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script type='text/javascript' src='jqueryui.js'></script>
+<script type='text/javascript'>
+var game = {
+    whoseTurn : 'blue',
+    nextTurn  : { blue : 'red', red : 'blue' },
+    column    : {
+        1 : 0, 2 : 0, 3 : 0, 4 : 0,
+        5 : 0, 6 : 0, 7 : 0, 8 : 0
+    },
+    buildBoard : function() {
+        var $dropHouse = $('#dropHouse');
+        var $board     = $('#board');
+        var i;
+        var j;
+        for ( i = 1; i <= 8; i++ ) {
+            $dropHouse.append(
+                '<div id="drop_' + i +
+                '" class="dropZone"></div>' );
+        }
+
+        for ( j = 7; j >= 0; j-- ) {
+            for ( i = 1; i <= 8; i++ ) {
+                $board.append(
+                    '<div class="space col_' + i +
+                    ' row_' + j + '"></div>' );
+            }
+        }
+        this.dragDropSetup();
+    },
+    dragDropSetup : function() {
+        $('#pickupPiece').addClass( this.whoseTurn + 'Piece' );
+        $('#pickupPiece').draggable({
+            helper : 'clone'
+        });
+        $('.dropZone').droppable( {
+            hoverClass : 'dropHover',
+            drop       : function() {
+                var dropColumn = this.id.replace( /drop_/, '' );
+                var dropRow    = game.column[ dropColumn ];
+                var piece      = game.whoseTurn + 'Piece';
+                if ( dropRow > 7 ) {
+                    alert( 'That column is full.  Try again.' );
+                    return;
+                }
+                game.column[ dropColumn ]++;
+                $('.col_' + dropColumn + '.row_' + dropRow)
+                    .append(
+                    '<div class="piece ' + piece + '"></div>'
+                    );
+                $('#pickupPiece').removeClass( piece );
+                game.whoseTurn =
+                    game.nextTurn[ game.whoseTurn ];
+                piece = game.whoseTurn + 'Piece';
+                $('#pickupPiece').addClass( piece );
+            }
+        } );
+    }
+};
+$(function() {
+    game.buildBoard();
+});
+</script>
+<style type='text/css'>
+  #pickup {
+      width  : 50px;
+      height : 50px;
+      border : 1px solid black;
+  }
+  #dropHouse {
+      width       : 416px;
+      height      :  50px;
+      margin-left :   2cm;
+  }
+  #board {
+      width       : 416px;
+      height      : 416px;
+      margin-left :   2cm;
+      margin-top  :   1px;
+      border      :   1px solid black;
+  }
+  .dropZone {
+      width         : 50px;
+      height        : 50px;
+      border-left   : 1px solid white;
+      border-right  : 1px solid white;
+      border-bottom : 1px solid white;
+      float         : left;
+  }
+  .dropHover {
+      background-color : yellow;
+      border-bottom : 2px solid black;
+  }
+  .space {
+      width  : 50px;
+      height : 50px;
+      border : 1px solid black;
+      float  : left;
+  }
+  .piece {
+      width  : 40px;
+      height : 40px;
+      border : 1px solid black;
+      margin-top  : 4px;
+      margin-left : 4px;
+      -moz-border-radius-topright    : 25px;
+      -moz-border-radius-topleft     : 25px;
+      -moz-border-radius-bottomright : 25px;
+      -moz-border-radius-bottomleft  : 25px;
+  }
+  .bluePiece { background-color : blue; }
+  .redPiece  { background-color : red;  }
+</style>
+</head>
+<body>
+<div id='pickup'>
+  <div id='pickupPiece' class='piece'></div>
+</div>
+<div id='dropHouse'></div>
+<div id='board'> </div>
+</body>
+</html>

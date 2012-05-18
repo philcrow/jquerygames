@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<head>
+<title>Two Player Boxes</title>
+<script type="text/javascript"
+  src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script type="text/javascript">
+var helper = {
+    totalBoxes  : 0,
+    playerBoxes : { blue : 0, red : 0 },
+    neededToWin : 0,
+    setup       : function( home, rows, columns ) {
+        var $home = $( home );
+        for ( var j = 0; j < rows; j++ ) {
+            for ( var i = 0; i < columns; i++ ) {
+                var classes = 'grayRight grayBottom';
+                if ( i == 0 && j == 0 ) {
+                    classes += ' grayLeft grayTop';
+                }
+                else if ( j == 0 )      {
+                    classes += ' grayTop';
+                }
+                else if ( i == 0 )      {
+                    classes += ' grayLeft';
+                }
+                $home.append(
+                  '<div id="box' + '_' + i + '_' + j +
+                  '" class="box ' + classes + '"> </div>' );
+                this.totalBoxes++;
+            }
+        }
+        this.neededToWin = this.totalBoxes / 2.0;
+
+        $(home + ' .box').click( function(evt) {
+            helper.click( this, evt );
+        });
+    },
+    click : function( target, evt ) {
+        var boxCoords = target.id.split( /_/ );
+        var boxX = parseInt( boxCoords[1] );
+        var boxY = parseInt( boxCoords[2] );
+        var leftToRight =
+            ( ( evt.clientX - target.offsetLeft )
+            / target.clientWidth ) - .5;
+        var topToBottom =
+            ( ( evt.clientY - target.offsetTop )
+            / target.clientHeight ) - .5;
+
+        var newClass = '';
+        var effectBoxX;
+        var effectBoxY;
+
+        if ( Math.abs( leftToRight ) >
+             Math.abs( topToBottom )
+        ) {
+            if ( leftToRight <  0 ) {  // left
+                if ( boxX == 0 ) {
+                     // we are the left edge
+                     effectBoxX = boxX;
+                     effectBoxY = boxY;
+                     newClass   = 'solidLeft';
+                }
+                else {
+                     effectBoxX = boxX - 1;
+                     effectBoxY = boxY;
+                     newClass   = 'solidRight';
+                }
+            }
+            else { // right
+                effectBoxX = boxX;
+                effectBoxY = boxY;
+                newClass   = 'solidRight';
+            }
+        }
+        else {
+            if ( topToBottom < 0 ) { // top
+                if ( boxY == 0 ) {
+                    // we are top edge
+                    effectBoxX = boxX;
+                    effectBoxY = boxY;
+                    newClass   = 'solidTop';
+                }
+                else {
+                    effectBoxX = boxX;
+                    effectBoxY = boxY - 1;
+                    newClass   = 'solidBottom';
+                }
+            }
+            else { // bottom
+                effectBoxX = boxX;
+                effectBoxY = boxY;
+                newClass   = 'solidBottom';
+            }
+        }
+
+        helper.takeTurn( effectBoxX, effectBoxY, newClass );
+    },
+    takeTurn : function( effectBoxX, effectBoxY, newClass ) {
+        var whoseTurn = 'red';
+        if ( $('#whoseTurn').hasClass( 'blue' ) ) {
+            whoseTurn = 'blue';
+        }
+
+        var effectBoxId =
+            '#box_' + effectBoxX + '_' + effectBoxY;
+        if ( $(effectBoxId).hasClass( newClass ) ) {
+            alert( 'That line was already marked, try again.' );
+            return;
+        }
+        $(effectBoxId).addClass( newClass );
+
+        var wonBoxes = [];
+        // then see if this makes any complete boxes
+        // start with effected box
+        if ( helper.countLines(
+                effectBoxX, effectBoxY ) == 4
+        ) {
+            wonBoxes.push( effectBoxId );
+        }
+        if ( newClass == 'solidRight'  ) {
+            var rightX = effectBoxX + 1;
+            if ( helper.countLines(
+                    rightX, effectBoxY ) == 4
+            ) {
+                wonBoxes.push(
+                    '#box_' + rightX + '_' + effectBoxY );
+            }
+        }
+        else if ( newClass == 'solidBottom' ) {
+            var bottomY = effectBoxY + 1;
+            if ( helper.countLines(
+                    effectBoxX, bottomY ) == 4
+            ) {
+                wonBoxes.push(
+                    '#box_' + effectBoxX + '_' + bottomY );
+            }
+        }
+
+        if ( wonBoxes.length > 0 ) {
+            for ( var i = 0; i < wonBoxes.length; i++ ) {
+                $( wonBoxes[i] ).addClass( whoseTurn );
+                helper.playerBoxes[ whoseTurn ]++;
+            }
+            // update scoring and check for a winner
+            $( '#' + whoseTurn + 'Score' ).html(
+                helper.playerBoxes[ whoseTurn ] );
+            if ( helper.playerBoxes[ whoseTurn ] >
+                 helper.neededToWin
+            ) {
+                alert( 'Congratulations, ' +
+                       whoseTurn + '!  You win!' );
+            }
+        }
+        else {
+            $('#whoseTurn')
+                .toggleClass( 'blue' )
+                .toggleClass( 'red' );
+        }
+    },
+    countLines  : function( i, j ) {
+        var count = 0;
+        var mine  = $( '#box_' + i + '_' + j );
+        var leftI = i - 1;
+        var topJ  = j - 1;
+        var left = $( '#box_' + (i-1) + '_' + j );
+        var top  = $( '#box_' + i + '_' + (j-1) );
+
+        if ( mine.hasClass( 'solidRight'  ) ) { count++; }
+        if ( mine.hasClass( 'solidBottom' ) ) { count++; }
+
+        if ( i == 0 && j == 0 ) { // upper left
+            if ( mine.hasClass( 'solidLeft' ) ) { count++; }
+            if ( mine.hasClass( 'solidTop'  ) ) { count++; }
+        }
+        else if ( j == 0 ) { // top row
+            if ( left.hasClass( 'solidRight' ) ) { count++; }
+            if ( mine.hasClass( 'solidTop'   ) ) { count++; }
+        }
+        else if ( i == 0 ) { // left side
+            if ( mine.hasClass( 'solidLeft'   ) ) { count++; }
+            if ( top.hasClass(  'solidBottom' ) ) { count++; }
+        }
+        else {
+            if ( left.hasClass( 'solidRight'  ) ) { count++; }
+            if ( top.hasClass(  'solidBottom' ) ) { count++; }
+        }
+        return count;
+    }
+};
+$(function(){
+    helper.setup( '#boxHouse', 7, 7 );
+});
+</script>
+<style type="text/css">
+  .red       { background : red;  }
+  .blue      { background : blue; }
+  .labels    { float      : left; }
+  .leftSpace { margin-left : 3px; }
+  .colorChip {
+      width       : 1cm;
+      height      : .5cm;
+      float       : left;
+      border      : 1px solid black;
+      color       : white;
+  }
+  .score { padding : 18px; }
+  #boxHouse {
+      width  : 8cm;
+      height : 10cm;
+  }
+  #boxHouse .box {
+      width  : 1cm;
+      height : 1cm;
+      float  : left;
+  }
+  .grayLeft    { border-left   : 1px solid #ccc;  }
+  .grayRight   { border-right  : 1px solid #ccc;  }
+  .grayTop     { border-top    : 1px solid #ccc;  }
+  .grayBottom  { border-bottom : 1px solid #ccc;  }
+  .solidLeft   { border-left   : 1px solid black; }
+  .solidRight  { border-right  : 1px solid black; }
+  .solidTop    { border-top    : 1px solid black; }
+  .solidBottom { border-bottom : 1px solid black; }
+</style>
+</head>
+<body>
+<div style='width:13cm;height:1.1cm'>
+  <div class='labels'>Whose Turn: </div>
+  <div class='blue leftSpace colorChip' id='whoseTurn'></div>
+  <div class='labels leftSpace' >Scores:</div>
+  <div class='blue leftSpace colorChip'>
+    <span class='score' id='blueScore'> 0 </span>
+  </div>
+  <div class='red  leftSpace colorChip'>
+    <span class='score' id='redScore'> 0 </span>
+  </div>
+</div>
+
+<div id='boxHouse'>
+</div>
+</body>
+</html>

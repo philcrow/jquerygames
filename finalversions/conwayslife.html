@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Conway's Game of Life</title>
+<script type='text/javascript'
+ src='http://code.jquery.com/jquery-latest.min.js'></script>
+<script type='text/javascript'>
+var helper = {
+    going     : false,
+    timer     : 0,
+    neighbors : {},
+    goStop    : function() {
+        if ( this.going ) {
+            this.going = false;
+            clearInterval( this.timer );
+            $('#goStop').text( 'Go' );
+        }
+        else {
+            this.going = true;
+            this.timer = setInterval( 'helper.step()', 500 );
+            $('#goStop').text( 'Stop' );
+        }
+    },
+    step      : function() {
+        var togglers = [];
+        for ( var box in this.neighbors ) {
+            if ( $(box).hasClass( 'live' ) ) {
+                if ( this.neighbors[ box ] < 2 ||
+                     this.neighbors[ box ] > 3 ) {
+                    togglers.push( box );
+                }
+            }
+            else {
+                if ( this.neighbors[ box ] == 3 ) {
+                    togglers.push( box );
+                }
+            }
+        }
+        for ( var i = 0; i < togglers.length; i++ ) {
+            this.updateCounts( togglers[i] );
+        }
+    },
+    updateCounts : function( box ) {
+        $(box).toggleClass( 'live' );
+        var inc = -1;
+        if ( $(box).hasClass( 'live' ) ) { inc = 1; }
+        var pieces = box.split( /_/ );
+        var row    = parseInt( pieces[1] );
+        var col    = parseInt( pieces[2] );
+        for ( var i = row - 1; i <= row + 1; i++ ) {
+            if ( i >= 0 && i < 50 ) {
+                for ( var j = col - 1; j <= col + 1; j++ ) {
+                    if ( j >= 0 && j < 50 &&
+                         ( row != i || col != j )
+                    ) {
+                        var myBox = '#box_' + i + '_' + j;
+                        var count = this.neighbors[ myBox ];
+                        if ( count == null ) {
+                            this.neighbors[ myBox ]  = inc;
+                        }
+                        else {
+                            this.neighbors[ myBox ] += inc;
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+$(function() {
+    var $house  = $('#house');
+    var squares = '';
+    for ( var row = 0; row < 50; row++ ) {
+        for ( var col = 0; col < 50; col++ ) {
+            squares +=
+                '<div class="square" id=' + 'box_' +
+                row + '_' + col + '></div>';
+        }
+    }
+    $house.append( squares );
+
+    $('.autoButton').click( function() {
+        helper[ this.id ]();
+    });
+
+    $('.square').click( function() {
+        helper.updateCounts( '#' + this.id );
+    });
+} );
+</script>
+<!-- inject skip start : styling and HTML as before -->
+<style type="text/css">
+  #house {
+      width  : 601px;
+      height : 601px;
+  }
+  .square {
+      width       : 10px;
+      height      : 10px;
+      float       : left;
+      border      : 1px solid black;
+      cursor      : pointer;
+  }
+  .live {
+      border           : 1px solid white;
+      background-color : black;
+  }
+</style>
+</head>
+<body>
+<div id='house'>
+</div>
+<button id='step'   class='autoButton'>Step</button>
+<button id='goStop' class='autoButton'>Go</button>
+</body>
+</html>

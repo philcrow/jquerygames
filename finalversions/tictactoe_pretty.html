@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tic-Tac-Toe</title>
+  <script type="text/javascript"
+    src="http://code.jquery.com/jquery-latest.min.js">
+  </script>
+<script type="text/javascript">
+$(function(){
+    var turn = 'X';
+    $('#boxHouse .box').click( function(evt) {
+        var target = evt.currentTarget;
+        var letter = $(target).html();
+        if ( letter.trim() == '' ) { // legal play
+            $(target).html( turn );
+            if ( turn == 'X' ) { turn = 'O'; }
+            else               { turn = 'X'; }
+        }
+        else {
+            alert( 'Box already marked by an ' +
+                letter + ', try again.' );
+        }
+    });
+});
+</script>
+<style type="text/css">
+  body{
+      font: 75% "Trebuchet MS", sans-serif;
+      margin: 50px;
+  }
+  .labels {
+      float : left;
+  }
+  #boxHouse {
+      width  : 4cm;
+      height : 4cm;
+  }
+  #boxHouse .box {
+      width      : 1cm;
+      height     : 1cm;
+      float      : left;
+      font-size  : 2.5em;
+      text-align : center;
+  }
+  .solidLeft   { border-left   : 1px solid black; }
+  .solidRight  { border-right  : 1px solid black; }
+  .solidTop    { border-top    : 1px solid black; }
+  .solidBottom { border-bottom : 1px solid black; }
+</style>
+</head>
+<body>
+<h1>Tic-Tac-Toe</h1>
+
+<p>Click on a box to own it.  Three in a row wins.</p>
+
+<div id='boxHouse'>
+  <div id='box_0_0' class='box solidRight solidBottom'></div>
+  <div id='box_1_0' class='box solidRight solidBottom'></div>
+  <div id='box_2_0' class='box solidBottom'></div>
+
+  <div id='box_0_1' class='box solidRight solidBottom'></div>
+  <div id='box_1_1' class='box solidRight solidBottom'></div>
+  <div id='box_2_1' class='box solidBottom'></div>
+
+  <div id='box_0_2' class='box solidRight'></div>
+  <div id='box_1_2' class='box solidRight'></div>
+  <div id='box_2_2' class='box'> </div>
+</div>
+
+</body>
+</html>

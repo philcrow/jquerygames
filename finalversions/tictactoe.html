@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tic-Tac-Toe</title>
+<script type="text/javascript"
+  src="http://code.jquery.com/jquery-latest.min.js">
+</script>
+<script type='text/javascript'>
+$( function() {
+    var turn = 'X';
+    $('.little').click( function() {
+        if ( $(this).html() == '' ) {
+            $(this).html( turn );
+            if ( turn == 'X' ) { turn = 'O'; }
+            else               { turn = 'X'; }
+        }
+        else {
+            alert( 'Box already marked' );
+        }
+    });
+} );
+</script>
+
+<style type="text/css">
+  .big {
+      width  : 3.5cm;
+      height : 3.5cm;
+  }
+  .little {
+      width      : 1cm;
+      height     : 1cm;
+      float      : left;
+      border     : 1px solid blue;
+      font-size  : 2.5em;
+      text-align : center;
+  }
+</style>
+</head>
+<body>
+<div class='big'>
+  <div class='little'></div>
+  <div class='little'></div>
+  <div class='little'></div>
+
+  <div class='little'></div>
+  <div class='little'></div>
+  <div class='little'></div>
+
+  <div class='little'></div>
+  <div class='little'></div>
+  <div class='little'></div>
+</div>
+
+</body>
+</html>
+

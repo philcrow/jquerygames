@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Mancala</title>
+<script type="text/javascript"
+ src="http://code.jquery.com/jquery-latest.min.js">
+</script>
+<script type='text/javascript'>
+var turn = 'Left';
+$(function() {
+    $('.Left.littleBowl').addClass( 'legals' );
+    $('.littleBowl').click( function() {
+        var bowlNo = parseInt( this.id.replace( /bowl_/, '' ) );
+        var contents;
+        var nextUp;
+        if ( $(this).hasClass( turn ) ) {
+            contents = parseInt( $(this).html() );
+            if ( contents == 0 ) {
+                alert( 'No seeds there.' );
+            }
+            else {
+                $(this).text( '0' );
+                if ( turn == 'Left' ) { nextUp = 'Right'; }
+                else                  { nextUp = 'Left';  }
+
+                var current = bowlNo;
+                while ( contents > 0 ) {
+                    current = current + 1;
+                    if ( current > 14 ) {
+                        current = 1;
+                    }
+                    var $bowl = $( '#bowl_' + current );
+
+                    if ( $bowl.hasClass( 'collectionBowl' ) &&
+                         $bowl.hasClass( nextUp )
+                    ) {
+                        // don't drop here
+                    }
+                    else {
+                        var seeds = parseInt( $bowl.html() );
+                        seeds     = seeds + 1;
+                        $bowl.html( seeds );
+                        contents  = contents - 1;
+                    }
+                }
+                if ( ! $bowl.hasClass( 'collectionBowl' )
+                ) {
+                    $('.' + turn   + '.littleBowl')
+                        .removeClass( 'legals' );
+                    $('.' + nextUp + '.littleBowl')
+                        .addClass(    'legals' );
+                    turn = nextUp;
+                }
+            }
+        }
+        else {
+            alert( 'Pick on your own side.' );
+        }
+    });
+} );
+</script>
+<style type="text/css">
+  .littleBowl {
+      width      : 1cm;
+      height     : 1cm;
+      float      : left;
+      font-size  : 1cm;
+      text-align : center;
+      cursor     : pointer;
+  }
+  .collectionBowl {
+      width      : 1cm;
+      height     : 2cm;
+      font-size  : 1cm;
+      text-align : center;
+  }
+  .legals {
+      background-color : #aaf;
+  }
+</style>
+</head>
+<!-- inject skip start : ... the <body> is as above -->
+<body>
+<table border='2'>
+  <tr>
+    <td id='bowl_14'
+        class='collectionBowl Right'
+        colspan='2'>0</td>
+  </tr>
+  <tr>
+    <td id='bowl_1'  class='littleBowl Left'>3</td>
+    <td id='bowl_13' class='littleBowl Right'>3</td>
+  </tr>
+  <tr>
+    <td id='bowl_2'  class='littleBowl Left'>3</td>
+    <td id='bowl_12' class='littleBowl Right'>3</td>
+  </tr>
+  <tr>
+    <td id='bowl_3'  class='littleBowl Left'>3</td>
+    <td id='bowl_11' class='littleBowl Right'>3</td>
+  </tr>
+  <tr>
+    <td id='bowl_4'  class='littleBowl Left'>3</td>
+    <td id='bowl_10' class='littleBowl Right'>3</td>
+  </tr>
+  <tr>
+    <td id='bowl_5'  class='littleBowl Left'>3</td>
+    <td id='bowl_9'  class='littleBowl Right'>3</td>
+  </tr>
+  <tr>
+    <td id='bowl_6'  class='littleBowl Left'>3</td>
+    <td id='bowl_8'  class='littleBowl Right'>3</td>
+  </tr>
+  <tr>
+    <td id='bowl_7'
+        class='collectionBowl Left'
+        colspan='2'>0</td>
+  </tr>
+</table>
+</body>
+<!-- inject skip end -->
+</html>

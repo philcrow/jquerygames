@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Code Breaker</title>
+<script type='text/javascript'
+ src='http://code.jquery.com/jquery-latest.min.js'></script>
+<script type='text/javascript'>
+var helper = {
+    col          : 1,
+    row          : 0,
+    colorClick   : function( clicked ) {
+        if ( this.col > 4 ) {
+            alert( 'Row full, Undo or Go.' );
+            return;
+        }
+        var color = $(clicked).css('background-color');
+        $('#row_' + this.row +' .col_' + this.col)
+              .css( 'background-color', color );
+        this.col++;
+    },
+    undo : function() {
+        if ( this.col == 1 ) {
+            alert( 'Nothing to undo.' );
+            return;
+        }
+        this.col--;
+        $('#row_' + this.row +' .col_' + this.col)
+            .css( 'background-color', 'white' );
+    },
+    go : function() {
+        if ( this.col <= 4 ) {
+            alert( 'Place four pegs, before Going.' );
+            return;
+        }
+        var winner   = false;
+        if ( this.row == 0 ) { // this is the answer, hide it
+            $('#row_0,#computer').hide();
+            this.col = 1;
+            this.row++;
+            return;
+        }
+        else {
+            var rowSel   = '#row_' + this.row;
+            var exact    = 0;
+            var nearMiss = 0;
+            var retries  = [];
+            // score this row
+            // ... first hits
+            for ( var i = 1; i <= 4; i++ ) {
+                var answerColor = $('#row_0 .col_' + i)
+                    .css('background-color');
+                var guessColor  = $(rowSel +' .col_' + i)
+                    .css('background-color');
+                if ( answerColor == guessColor ) {
+                    exact++;
+                }
+                else {
+                    retries.push( {
+                        col    : i,
+                        answer : answerColor,
+                        used   : false
+                    } );
+                }
+            }
+
+            // ... then misses
+            if ( exact == 4 ) {
+                winner = true;
+            }
+            else {
+                for ( var j = 0; j < retries.length; j++ ) {
+                    var guessColor =
+                        $(rowSel + ' .col_' + retries[j].col)
+                            .css('background-color');
+                    for ( var k = 0; k < retries.length; k++ ) {
+                        var retK = retries[k];
+                        if ( ! retK.used ) {
+                            if ( retK.answer == guessColor ) {
+                                nearMiss++;
+                                retK.used = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            // show score
+            $(rowSel + ' .statusBox .statusHit')
+                .text( exact );
+            $(rowSel + ' .statusBox .statusNearMiss')
+                .text( nearMiss );
+            // advance row
+            this.row++;
+            this.col = 1;
+        }
+
+        if ( this.row > 10 || winner ) {
+            $('#row_0').show();
+        }
+    },
+    computer : function() {
+        $('#row_0,#computer').hide();
+        for ( var i = 1; i <= 4; i++ ) {
+            var random = Math.floor( Math.random() * 7 );
+            var randomColor = $('.colorChip:eq(' + random + ')')
+                .css( 'background-color' );
+            $('#row_0 .col_' + i)
+                .css('background-color', randomColor );
+        }
+        this.row = 1;
+        this.col = 1;
+    }
+};
+$( function() {
+<!-- inject skip start : as described above... -->
+    // build the board
+    $('.bigBox').append( "<div id='row_0' class='row'></div>" );
+    for ( var i = 10; i >= 1; i-- ) {
+        $('.bigBox').append(
+            "<div id='row_" + i + "' class='row'></div>" );
+    }
+    for ( var j = 1; j <= 4; j++ ) {
+        $('.row').append( 
+            "<div class='guessBox col_" + j + "'></div>" );
+    }
+    $('.row').append(
+          "<div class='statusBox'>" +
+          "  <span class='statusHit'></span>" +
+          "  <span class='statusNearMiss'></span>" +
+          "</div>"
+    );
+
+    // color chips
+    var colors = [
+        'red', 'gold', 'blue', 'coral',
+        'blueviolet', 'aquamarine', 'fuchsia'
+    ];
+    for ( var k = 0; k < colors.length; k++ ) {
+        $('.colorChips').append(
+            "<div class='colorChip' style='background-color:" +
+            colors[ k ] + "'></div>"
+        );
+    }
+
+    // click handlers
+    $('.colorChip').click( function() {
+        helper.colorClick( this );
+    });
+    $('.autoButton').click( function() {
+        helper[ this.id ]();
+    });
+});
+</script>
+<style type="text/css">
+  .bigBox {
+      width  : 2.4cm;
+      height : 7.2cm;
+  }
+  .guessBox {
+      margin-left : .1cm;
+      width       : .25cm;
+      height      : .25cm;
+      float       : left;
+      border      : 1px solid black;
+  }
+  .statusBox {
+      margin-left   : .1cm;
+      margin-bottom : .1cm;
+      width         : .6cm;
+      height        : .5cm;
+      float         : left;
+      border        : 1px solid gray;
+  }
+  #row_0 .statusBox {
+      border-color : white;
+  }
+  .statusHit {
+      padding-left : .05cm;
+      color        : green;
+      float        : left;
+  }
+  .statusNearMiss {
+      padding-right : .05cm;
+      color         : red;
+      float         : right;
+  }
+  .colorChips {
+      padding-top : .2cm;
+      width       : 6cm;
+      height      : 1.2cm;
+      clear       : both;
+  }
+  .colorChip {
+      width       : .5cm;
+      height      : .5cm;
+      margin-left : .1cm;
+      border      : 1px solid black;
+      float       : left;
+  }
+</style>
+</head>
+<body>
+<div class='bigBox'> </div>
+<div class='colorChips'></div>
+<button id='go'       class='autoButton'>Go</button>
+<button id='undo'     class='autoButton'>Undo</button>
+<button id='computer' class='autoButton'>Computer Play</button>
+</body>
+</html>

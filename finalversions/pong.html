@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Pong</title>
+<script type='text/javascript' src='http://code.jquery.com/jquery-latest.min.js'></script>
+<style type='text/css'>
+#board {
+    height       : 250px;
+    width        : 350px;
+    border-top   : 1px solid black;
+    border-left  : 1px solid black;
+    border-right : 1px solid black;
+    position     : relative;
+}
+#paddleHome {
+    height   : 12px;
+    width    : 350px;
+    position : relative;
+}
+#paddle {
+    width            : 36px;
+    height           : 12px;
+    background-color : black;
+    position         : absolute;
+}
+#ball {
+    height           : 12px;
+    width            : 12px;
+    top              : 0px;
+    background-color : black;
+    position         : absolute;
+}
+</style>
+<script type='text/javascript'>
+var pong = {
+    $paddle   : null,
+    $ball     : null,
+    velocityX : 1,
+    velocityY : 1,
+    timer     : null
+};
+$(function() {
+    pong.$ball = $('#ball');
+    pong.$ball.css( 'left', Math.round( Math.random() * 314 ) + 1 );
+    pong.$paddle = $('#paddle');
+    $('body').mousemove( function( e ) {
+        pong.$paddle.css( 'left', Math.min( e.clientX - 8, 314 ) );
+    });
+
+    pong.timer = setInterval(
+        function() {
+            var oldX = parseInt( pong.$ball.css( 'left' ).replace( 'px', '' ), 10 );
+            var oldY = parseInt( pong.$ball.css( 'top'  ).replace( 'px', '' ), 10 );
+
+            var newX;
+            var newY;
+            var paddleMin
+            var paddleMax;
+
+            // keep the ball in play
+            if ( oldX > 338 || oldX < 0 ) {
+                pong.velocityX *= -1;
+            }
+            if ( oldY < 0 ) {
+                pong.velocityY *= -1;
+            }
+            if ( oldY > 238 ) {
+                // check for paddle
+                paddleMin = parseInt( pong.$paddle.css( 'left' ).replace( 'px', '' ), 10 );
+                paddleMax = paddleMin + 36;
+                if ( oldX > paddleMin && oldX < paddleMax ) {
+                    pong.velocityY *= -1;
+                }
+                else {
+                    clearInterval( pong.timer );
+                    alert( 'loser' );
+                }
+            }
+            newX = oldX + pong.velocityX;
+            newY = oldY + pong.velocityY;
+
+            pong.$ball.css( 'left', newX );
+            pong.$ball.css( 'top',  newY );
+        },
+        25
+    );
+});
+</script>
+</head>
+<body>
+    <div id='board'>
+        <div id='ball'>
+        </div>
+    </div>
+    <div id='paddleHome'>
+        <div id='paddle'>
+        </div>
+    </div>
+</body>
+</html>

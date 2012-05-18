@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Peg Solitaire</title>
+<script type="text/javascript"
+ src="http://code.jquery.com/jquery-latest.min.js">
+</script>
+<script type='text/javascript'>
+var helper = {
+    stage       : 'initial',
+    col         : 0,
+    row         : 0,
+    selected    : null,
+    setSelected : function( selectedPeg ) {
+        var pos       = selectedPeg.id.split( /_/ );
+        this.col      = parseInt( pos[1] );
+        this.row      = parseInt( pos[2] );
+        this.stage    = 'second';
+        this.selected = selectedPeg;
+    },
+    click : function( clicked ) {
+        this[ this.stage ]( clicked );
+    },
+    initial : function( clicked ) {
+        if ( $(clicked).hasClass( 'pegged' ) ) {
+            this.setSelected( clicked );
+            $(clicked).addClass( 'selected' );
+            this.stage = 'second';
+        }
+        else {
+            alert( 'Click on a peg' );
+        }
+    },
+    second : function( clicked ) {
+        if ( $( clicked ).hasClass( 'pegged' ) ) {
+            if ( clicked == this.selected ) {
+                $( clicked ).removeClass( 'selected' );
+                this.stage = 'initial';
+            }
+            else {
+                alert( 'click on selected peg or a space' );
+            }
+            return;
+        }
+
+        var pos        = clicked.id.split( /_/ );
+        var landingCol = parseInt( pos[1] );
+        var landingRow = parseInt( pos[2] );
+        var colDiff    = landingCol - helper.col;
+        var rowDiff    = landingRow - helper.row;
+
+        // one has to be zero, the other must be 2 or -2
+        var jumping;
+        var $jumped;
+        if ( colDiff == 0 &&
+               ( rowDiff == 2 || rowDiff == -2 ) ) {
+            if ( rowDiff == 2 ) {
+                jumping = landingCol + '_' + (landingRow-1);
+            }
+            else {
+                jumping = landingCol + '_' + (landingRow+1);
+            }
+        }
+        else if ( rowDiff == 0 &&
+                    ( colDiff == 2 || colDiff == -2 )  ) {
+            if ( colDiff == 2 ) {
+                jumping = (landingCol-1) + '_' + landingRow;
+            }
+            else {
+                jumping = (landingCol+1) + '_' + landingRow;
+            }
+        }
+        else {
+            alert( 'illegal move ' + landingCol + ' ' +
+                landingRow + ' ' + helper.col + ' ' +
+                helper.row + ' ' + colDiff + ' ' + rowDiff
+            );
+            return;
+        }
+        $jumped = $( '#peg_' + jumping );
+        if ( $jumped.hasClass( 'pegged' ) ) {
+            $(clicked).addClass( 'pegged' );
+            $(this.selected)
+                .removeClass( 'pegged' )
+                .removeClass( 'selected' );
+            $jumped.removeClass( 'pegged' );
+            this.stage = 'initial';
+        }
+        else {
+            alert( 'illegal move' );
+        }
+    }
+};
+$(function() {
+    $('.pegHole').click( function() {
+        helper.click( this );
+    });
+});
+</script>
+<style type="text/css">
+  .pegHouse {
+      width  : 3.3cm;
+      height : 6.5cm;
+  }
+  .pegHole {
+      margin-left : .15cm;
+      margin-top  : .15cm;
+      width       : .25cm;
+      height      : .25cm;
+      float       : left;
+      border      : 1px solid black;
+      cursor      : pointer;
+  }
+  .pegged {
+      background-color : black;
+  }
+  .hiddenPeg {
+      margin-left : .15cm;
+      margin-top  : .15cm;
+      width       : .25cm;
+      height      : .25cm;
+      float       : left;
+      border      : 1px solid white;
+  }
+  .selected {
+      border : 1px solid red;
+  }
+</style>
+</head>
+<body>
+<div class='pegHouse'>
+  <div class='hiddenPeg'></div>
+  <div class='hiddenPeg'></div>
+  <div id='peg_3_1' class='pegHole pegged'></div>
+  <div id='peg_4_1' class='pegHole pegged'></div>
+  <div id='peg_5_1' class='pegHole pegged'></div>
+  <div class='hiddenPeg'></div>
+  <div class='hiddenPeg'></div>
+
+  <div class='hiddenPeg'></div>
+  <div class='hiddenPeg'></div>
+  <div id='peg_3_2' class='pegHole pegged'></div>
+  <div id='peg_4_2' class='pegHole pegged'></div>
+  <div id='peg_5_2' class='pegHole pegged'></div>
+  <div class='hiddenPeg'></div>
+  <div class='hiddenPeg'></div>
+
+  <div id='peg_1_3' class='pegHole pegged'></div>
+  <div id='peg_2_3' class='pegHole pegged'></div>
+  <div id='peg_3_3' class='pegHole pegged'></div>
+  <div id='peg_4_3' class='pegHole pegged'></div>
+  <div id='peg_5_3' class='pegHole pegged'></div>
+  <div id='peg_6_3' class='pegHole pegged'></div>
+  <div id='peg_7_3' class='pegHole pegged'></div>
+
+  <div id='peg_1_4' class='pegHole pegged'></div>
+  <div id='peg_2_4' class='pegHole pegged'></div>
+  <div id='peg_3_4' class='pegHole pegged'></div>
+  <div id='peg_4_4' class='pegHole       '></div>
+  <div id='peg_5_4' class='pegHole pegged'></div>
+  <div id='peg_6_4' class='pegHole pegged'></div>
+  <div id='peg_7_4' class='pegHole pegged'></div>
+
+  <div id='peg_1_5' class='pegHole pegged'></div>
+  <div id='peg_2_5' class='pegHole pegged'></div>
+  <div id='peg_3_5' class='pegHole pegged'></div>
+  <div id='peg_4_5' class='pegHole pegged'></div>
+  <div id='peg_5_5' class='pegHole pegged'></div>
+  <div id='peg_6_5' class='pegHole pegged'></div>
+  <div id='peg_7_5' class='pegHole pegged'></div>
+
+  <div class='hiddenPeg'></div>
+  <div class='hiddenPeg'></div>
+  <div id='peg_3_6' class='pegHole pegged'></div>
+  <div id='peg_4_6' class='pegHole pegged'></div>
+  <div id='peg_5_6' class='pegHole pegged'></div>
+  <div class='hiddenPeg'></div>
+  <div class='hiddenPeg'></div>
+
+  <div class='hiddenPeg'></div>
+  <div class='hiddenPeg'></div>
+  <div id='peg_3_7' class='pegHole pegged'></div>
+  <div id='peg_4_7' class='pegHole pegged'></div>
+  <div id='peg_5_7' class='pegHole pegged'></div>
+  <div class='hiddenPeg'></div>
+  <div class='hiddenPeg'></div>
+
+</div>
+</table>
+</body>
+</html>
