@@ -17,6 +17,10 @@
     width    : 350px;
     position : relative;
 }
+#paddleReceiver {
+    height   : 350px;
+    width    : 350px;
+}
 #paddle {
     width            : 36px;
     height           : 12px;
@@ -66,9 +70,9 @@ $(function() {
             }
             if ( oldY > 238 ) {
                 // check for paddle
-                paddleMin = parseInt( pong.$paddle.css( 'left' ).replace( 'px', '' ), 10 );
+                paddleMin = parseInt( pong.$paddle.css( 'left' ).replace( 'px', '' ), 10 ) - 6;
                 paddleMax = paddleMin + 36;
-                if ( oldX > paddleMin && oldX < paddleMax ) {
+                if ( oldX >= paddleMin && oldX < paddleMax ) {
                     pong.velocityY *= -1;
                 }
                 else {
@@ -95,6 +99,8 @@ $(function() {
     <div id='paddleHome'>
         <div id='paddle'>
         </div>
+    </div>
+    <div id='paddleReceiver'>
     </div>
 </body>
 </html>
