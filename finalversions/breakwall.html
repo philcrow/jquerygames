@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Break Wall</title>
+<script type='text/javascript' src='http://code.jquery.com/jquery-latest.min.js'></script>
+<style type='text/css'>
+#board {
+    height       : 250px;
+    width        : 350px;
+    border-top   : 1px solid black;
+    border-left  : 1px solid black;
+    border-right : 1px solid black;
+    position     : relative;
+}
+#paddleHome {
+    height   : 12px;
+    width    : 350px;
+    position : relative;
+}
+#paddleReceiver {
+    height   : 350px;
+    width    : 350px;
+}
+#paddle {
+    width            : 36px;
+    height           : 12px;
+    background-color : black;
+    position         : absolute;
+}
+#ball {
+    height           : 12px;
+    width            : 12px;
+    top              : 60px;
+    background-color : black;
+    position         : absolute;
+}
+.brick {
+    height           : 12px;
+    width            : 35px;
+    background-color : black;
+    position         : absolute;
+}
+</style>
+<script type='text/javascript'>
+var obj = {
+    $paddle   : null,
+    $ball     : null,
+    velocityX : 1,
+    velocityY : 1,
+    timer     : null,
+    remaining : 0,
+    blocks    : []
+};
+$(function() {
+    var i, j;
+    var $board = $('#board');
+    var $brick;
+    var row;
+    obj.$ball = $('#ball');
+    obj.$ball.css( { 'top' : 85, 'left' : Math.round( Math.random() * 314 ) + 1 } );
+    obj.$paddle = $('#paddle');
+    $('body').mousemove( function( e ) {
+        obj.$paddle.css( 'left', Math.min( e.clientX - 8, 314 ) );
+    });
+
+    // make the bricks
+    for ( i = 0; i < 10; i++ ) {
+        row = [];
+        for ( j = 0; j < 5; j++ ) {
+            $brick = $( '<div id="brick_' + i + '_' + j + '" class="brick">' );
+            $brick.css( { 'top' : 24 + 12*j, 'left' : 35*i } )
+
+            $board.append( $brick );
+
+            row.push( 1 );
+            obj.remaining++;
+        }
+        obj.blocks.push( row );
+    }
+
+   obj.timer = setInterval(
+       function() {
+           var oldX = parseInt( obj.$ball.css( 'left' ).replace( 'px', '' ), 10 );
+           var oldY = parseInt( obj.$ball.css( 'top'  ).replace( 'px', '' ), 10 );
+
+           var newX;
+           var newY;
+           var paddleMin
+           var paddleMax;
+           var struckRow;
+           var struckCol;
+           var struckBlock;
+
+           // keep the ball in play
+           if ( oldX > 338 || oldX < 0 ) {
+               obj.velocityX *= -1;
+           }
+           if ( oldY < 0 ) {
+               obj.velocityY *= -1;
+           }
+           if ( oldY > 238 ) {
+               // check for paddle
+               paddleMin = parseInt( obj.$paddle.css( 'left' ).replace( 'px', '' ), 10 ) - 6;
+               paddleMax = paddleMin + 36;
+               if ( oldX >= paddleMin && oldX < paddleMax ) {
+                   obj.velocityY *= -1;
+               }
+               else {
+                   clearInterval( obj.timer );
+                   alert( 'loser' );
+               }
+           }
+
+           // see if we hit any blocks
+           struckRow   = parseInt( (oldY - 18) / 12, 10 );
+           struckCol   = parseInt( (oldX -  6) / 35, 10 );
+           struckBlock = obj.blocks[ struckCol][ struckRow ];
+
+           if ( struckBlock != null && struckBlock > 0 ) {
+               obj.blocks[ struckCol][ struckRow ] = 0;
+               $('#brick_' + struckCol + '_' + struckRow ).hide();
+               obj.remaining--;
+
+               obj.velocityY *= -1;
+
+               if ( obj.remaining <= 0 ) {
+                   alert( 'winner' );
+               }
+           }
+
+           newX = oldX + obj.velocityX;
+           newY = oldY + obj.velocityY;
+
+           obj.$ball.css( 'left', newX );
+           obj.$ball.css( 'top',  newY );
+       },
+       25
+   );
+});
+</script>
+</head>
+<body>
+    <div id='board'>
+        <div id='ball'>
+        </div>
+    </div>
+    <div id='paddleHome'>
+        <div id='paddle'>
+        </div>
+    </div>
+    <div id='paddleReceiver'>
+    </div>
+</body>
+</html>
