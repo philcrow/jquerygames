@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type='text/javascript' src='http://code.jquery.com/jquery-latest.min.js'></script>
+<style type='text/css'>
+#battlefield {
+    border : 1px solid black;
+}
+</style>
+<script type='text/javascript'>
+var tanks = {
+    leftCannonAngle : 45,
+    leftCannonRads  : 0,
+    muzzleVelocity  : 150,
+    firing          : false,
+    mouseUp         : true,
+    setup: function() {
+        tanks.leftCannonRads = -1 * tanks.leftCannonAngle * Math.PI/180;
+        tanks.drawLeftCannon();
+        tanks.drawTarget();
+
+        $('#fireLeft').click( tanks.fireLeft );
+        $('#battlefield')
+            .mousemove( function( evt ) {
+                if ( tanks.mouseUp || tanks.firing ) return;
+                tanks.resetAngle( evt );
+            })
+            .mouseup(   function() { tanks.mouseUp = true;  })
+            .mousedown( function() { tanks.mouseUp = false; });
+    },
+    drawTarget: function() {
+        tanks.context.fillRect( 800, 525, 75, 2 );
+    },
+    drawLeftCannon: function() {
+        var context = tanks.context;
+        context.clearRect( 20, 475, 60, 60 );
+        context.fillStyle = "black";
+        context.translate( 25, 525 );
+        context.rotate( tanks.leftCannonRads );
+        context.fillRect( 0, 0, 50, 5 );
+        context.rotate( -1 * tanks.leftCannonRads );
+        context.translate( -25, -525 );
+    },
+    resetAngle: function( evt ) {
+        var mouseX     = evt.pageX;
+        var mouseY     = evt.pageY;
+        var mouseTheta = -1 * Math.atan2( 550 - mouseY, mouseX );
+        if ( mouseTheta < -1.57 || mouseTheta > 0 ) {
+            return;
+        }
+        tanks.leftCannonRads = mouseTheta
+        tanks.drawLeftCannon();
+    },
+    fireLeft: function() {
+        if ( tanks.firing ) return;
+        var xFactor  = Math.cos( tanks.leftCannonRads );
+        var yFactor  = Math.sin( tanks.leftCannonRads );
+        var launchX  =       50 * xFactor + 25;
+        var launchY  = 525 + 50 * yFactor;
+        var t        = 0;
+        var deltaT   = .01;
+        var velX     = tanks.muzzleVelocity * xFactor;
+        var velY     = tanks.muzzleVelocity * yFactor;
+        var currentX = null;
+        var currentY = null;
+
+        tanks.firing = true;
+
+        tanks.context.fillStyle = "red";
+
+        tanks.timer = setInterval( function() {
+            // remove old ball (or not)
+            if ( currentX ) {
+                tanks.context.clearRect( currentX, currentY, 2, 2 );
+            }
+            // place new ball
+            t       += deltaT;
+            currentX = Math.round( launchX + velX * t - 0.5 * t     );
+            currentY = Math.round( launchY + velY * t + 9.8 * t * t );
+
+            tanks.context.fillRect( currentX, currentY, 2, 2 );
+
+            if ( currentY > 525 || currentX > 900 ) {
+                clearInterval( tanks.timer );
+
+                tanks.firing = false;
+            }
+        }, 5 );
+    },
+    nocomma : 1
+};
+$(function() {
+    tanks.canvas  = document.getElementById( "battlefield" );
+    tanks.context = tanks.canvas.getContext( "2d" );
+    tanks.setup();
+});
+</script>
+</head>
+<body>
+<canvas id='battlefield' width='900' height='550'></canvas>
+<div>
+<button id='fireLeft' type='button'>Fire!</button>
+</div>
+</body>
+</html>
